@@ -27,10 +27,10 @@ class GitHub_Collector():
         self.url = None
 
         # user typed all empty string or did not set parameters correctly
-        if username in ["", None] and repository in ["", None] and  url in ["", None] :
+        if not ( username and repository and url ):
             raise self.All_Empty_ValueError
 
-        if url and url != "":
+        if url:
             
             if self.verify_github_url( url ) and self.http_module.get_with_success( url ):
 
@@ -44,7 +44,7 @@ class GitHub_Collector():
             # url is not valid, need to check user and repo
             logger.debug("URL is not defined, checking username and repository strings")
 
-            if username and username != "":
+            if username:
                 
                 if not self.http_module.get_with_success( gh_url_for_user( username ) ):
                     self.logger.error("Username provided is not a valid GitHub username, raising custom exception")
@@ -53,7 +53,7 @@ class GitHub_Collector():
                 self.logger.error("Username field is not defined or empty string, raising custom exception")
                 raise self.Username_Empty_Exception
 
-            if repository and repository != "":
+            if repository:
 
                 if self.http_module.get_with_success( gh_url_for_repository( username, repository ) ):
                     # this is where you want to be
@@ -92,7 +92,7 @@ class GitHub_Collector():
             api_request_url = url or self.url
             api_response = self.http_module.get( api_request_url )
 
-            if self.http_module.request_has_success( api_response["rc"] ):
+            if self.http_module.request_has_success( api_response["status_code"] ):
 
                 # parse data from GitHUB API. this object contains all files and folder in actual directory
                 # if it's the first iteraction, this object contains the description of the root folder in the repository
@@ -122,7 +122,7 @@ class GitHub_Collector():
                             
                             response_for_file_request = self.http_module.get( file_url )
 
-                            response_status_code = response_for_file_request["rc"]
+                            response_status_code = response_for_file_request["status_code"]
 
                             if self.http_module.request_has_success( response_status_code ) :
                                 # if here, meands api is not expired yet and data has been downloaded
@@ -137,7 +137,7 @@ class GitHub_Collector():
                         yield from self.get_files_from_url( object_in_repository["url"] )
 
             else:
-                self.logger.error( f'{myutils.myfunc_name()} got http status code {api_response["rc"]} while trying to retreive {api_request_url}')
+                self.logger.error( f'{myutils.myfunc_name()} got http status code {api_response["status_code"]} while trying to retreive {api_request_url}')
                 raise self.API_Exception
 
         except Exception as e:

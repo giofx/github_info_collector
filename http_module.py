@@ -24,7 +24,7 @@ class HTTPreq:
                                 Exception is at line {myutils.getLineLastException()}. Exception is {e}")
             raise e
         response = {}
-        response["rc"] = http_response.status_code
+        response["status_code"] = http_response.status_code
         response["encoding"] = http_response.encoding
         response["headers"] = http_response.headers
 
@@ -37,7 +37,7 @@ class HTTPreq:
             Return just status code for get request
         """
         response = self.get(url, headers )
-        return response["rc"]
+        return response["status_code"]
 
     def request_has_success( self, status_code ):
         return ( 300 > status_code >= 200 )

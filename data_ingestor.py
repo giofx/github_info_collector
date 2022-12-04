@@ -16,7 +16,7 @@ regex_match_addresses = r'(via|viale|piazza|strada)(\s[A-Za-z]+\.?)+\s\d{1,5}[\s
 # local part of an email can container special chars as !#$%&'*+-/=?^_`{|}~ , can not start or end with a point
 # domain can have alfanumeric chars, - can be in domain but not at start or end, first level domain can not be all numeric
 # https://regexr.com/73adn
-regex_match_email = r'([\w\!\#\$\%\&\'\*\+\-\/\=\?\^\_\`\{\|\}\~]+\.)*(\.?[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\_\`\{\|\}\~]+)+@(\w([\w-]+\.))+([\w-]+\.)*([\w-]{1,}\w)'
+regex_match_email = r'([\w\!\#\$\%\&\'\*\+\-\/\=\?\^\_\`\{\|\}\~]+\.)+(\.?[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\_\`\{\|\}\~]+)*@(\w([\w-]+\.))+([\w-]+\.)*([\w-]{1,}\w)'
 
 # REGEEX TELEPHONE NUMBERS
 # https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
@@ -35,31 +35,27 @@ regex_match_tokens = r'(["\']?[\w-]*(key|password|pwd|secret|token)[\w-]*["\']?\
 
 # REGEX URL
 # https://regexr.com/73b66
-regex_match_url = r'[A-Za-z]+:\/\/((\w[\w-]*\.)*\w+|([0-2]?\d{1,2}\.){3}[0-2]?\d{1,2})(:[0-6]?\d{1,4})?(\/[\w\?\&\=\%\.\£\$]+)*'
+regex_match_url = r'\w{3,}:\/\/((\w[\w-]*\.)*\w+|([0-2]?\d{1,2}\.){3}[0-2]?\d{1,2})(:[0-6]?\d{1,4})?(\/[\w\?\&\=\%\.\£\$]+)*'
 
 class Data:
-    addresses = []
-    emails = []
-    telephones = []
-    tokens = []
-    urls = []
-
-    collect = {
-        "addresses" : False,
-        "emails" : False,
-        "telephones" : False,
-        "tokens" : False,
-        "urls" : False
-    }
-
-    collection = { }
 
     def __init__ (self, collect_addresses = False, collect_emails = False, collect_telephones = False, collect_tokens = False, collect_urls = False ):
-        self.collect["addresses"] = collect_addresses
-        self.collect["emails"] = collect_emails
-        self.collect["telephones"] = collect_telephones
-        self.collect["tokens"] = collect_tokens
-        self.collect["urls"] = collect_urls
+
+        self.addresses = []
+        self.emails = []
+        self.telephones = []
+        self.tokens = []
+        self.urls = []
+
+        self.collect = {
+            "addresses" : collect_addresses,
+            "emails" : collect_emails,
+            "telephones" : collect_telephones,
+            "tokens" : collect_tokens,
+            "urls" : collect_urls
+        }
+
+        self.collection = { }
 
         if self.collect["addresses"]: self.collection["addresses"] = self.addresses
         if self.collect["emails"]: self.collection["emails"] = self.emails

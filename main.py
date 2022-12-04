@@ -21,6 +21,7 @@ class Exit_Code(Enum):
     REPOSITORY_NOT_VALID_EXCEPTION = 7
     DOWNLOAD_EXCEPTION = 8
     API_EXCEPTION = 9
+    UNKNOWN_EXCEPTION = 255
 
 
 def argv_to_conf():
@@ -102,36 +103,40 @@ def main():
     try:
         # initializing github info stealer
         collector = GitHub_Collector(logger, conf["github"]["user"], conf["github"]["repo"], conf["github"]["url"])
-    except GitHub_Collector.All_Empty_ValueError:
-        message = "All inputs needed to identify a valid GitHub repository are not properly filled. Specify a Username and Repository with -u and -r or a link with -l . Application will close"
+    except ValueError as e:
+
+        message = str(e)
+        exit_code = Exit_Code.UNKNOWN_EXCEPTION.value
+
+        if type(e) == GitHub_Collector.All_Empty_ValueError:
+            message = "All inputs needed to identify a valid GitHub repository are not properly filled. Specify a Username and Repository with -u and -r or a link with -l . Application will close"
+            exit_code = Exit_Code.ALL_EMPTY_PARAMS.value
+        elif type(e) == GitHub_Collector.URL_Exception:
+            message = "URL provided does not match a valid GitHub repository. Application will close"
+            exit_code = Exit_Code.ALL_EMPTY_PARAMS.value
+        elif type(e) == GitHub_Collector.Username_Not_Valid_Exception:
+            message = "Username provided does not match a valid GitHub user. Application will close"
+            exit_code = Exit_Code.USERNAME_NOT_VALID_EXCEPTION.value
+        elif type(e) == GitHub_Collector.Username_Empty_Exception:
+            message = "Username field is empty. Application will close"
+            exit_code = Exit_Code.USERNAME_EMPTY_EXCEPTION.value
+        elif type(e) == GitHub_Collector.Repository_Empty_Exception:
+            message = "Repository field is empty. Application will close"
+            exit_code = Exit_Code.REPOSITORY_EMPTY_EXCEPTION.value
+        elif type(e) == GitHub_Collector.Repository_Not_Valid_Exception:
+            message = "Repository provided does not match a valid GitHub repository for user. Application will close"
+            exit_code = Exit_Code.REPOSITORY_NOT_VALID_EXCEPTION.value
+
         logger.error( message )
         print( message , file=sys.stderr)
-        sys.exit(Exit_Code.ALL_EMPTY_PARAMS.value)
-    except GitHub_Collector.URL_Exception:
-        message = "URL provided does not match a valid GitHub repository. Application will close"
+        sys.exit(exit_code)
+
+    except Exception as e:
+        message = f"Got {type(e).__name__} Exception while trying to initialize GitHub Collector. Application will close"
         logger.error( message )
         print( message , file=sys.stderr)
-        sys.exit(Exit_Code.URL_EXCEPTION.value)
-    except GitHub_Collector.Username_Not_Valid_Exception:
-        message = "Username provided does not match a valid GitHub user. Application will close"
-        logger.error( message )
-        print( message , file=sys.stderr)
-        sys.exit(Exit_Code.USERNAME_NOT_VALID_EXCEPTION.value)
-    except GitHub_Collector.Username_Empty_Exception:
-        message = "Username field is empty. Application will close"
-        logger.error( message )
-        print( message , file=sys.stderr)
-        sys.exit(Exit_Code.USERNAME_EMPTY_EXCEPTION.value)
-    except GitHub_Collector.Repository_Empty_Exception:
-        message = "Repository field is empty. Application will close"
-        logger.error( message )
-        print( message , file=sys.stderr)
-        sys.exit(Exit_Code.REPOSITORY_EMPTY_EXCEPTION.value)
-    except GitHub_Collector.Repository_Not_Valid_Exception:
-        message = "Repository provided does not match a valid GitHub repository for user. Application will close"
-        logger.error( message )
-        print( message , file=sys.stderr)
-        sys.exit(Exit_Code.REPOSITORY_NOT_VALID_EXCEPTION.value)
+        sys.exit(Exit_Code.UNKNOWN_EXCEPTION.value)
+
 
 
     logger.debug("GitHub data collector initialized with no exceptions. Going to initialize data ingestor and then read files")
